@@ -2,6 +2,7 @@ package rlze.bancodigitalapi.infrastructure.adapters.in.web.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -9,6 +10,7 @@ import rlze.bancodigitalapi.domain.exception.BusinessException;
 import rlze.bancodigitalapi.domain.exception.EntityNotFoundException;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ErrorResponse;
 
+import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
 import java.util.Map;
 
@@ -53,5 +55,17 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleConflict(ObjectOptimisticLockingFailureException ex) {
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("CONCURRENCY_ERROR", "A conta foi atualizada por outra operação. Tente novamente."));
+    }
+
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
+        return ResponseEntity.badRequest()
+                .body(new ErrorResponse("INVALID_JSON", "O payload enviado contém campos desconhecidos ou inválidos."));
+    }
+
+    @ExceptionHandler(InvalidParameterException.class) // Crie essa classe no domain.exception
+    public ResponseEntity<ErrorResponse> handleInvalidParameter(InvalidParameterException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
     }
 }

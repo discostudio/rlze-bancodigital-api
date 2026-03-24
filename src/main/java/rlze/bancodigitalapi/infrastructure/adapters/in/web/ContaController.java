@@ -1,15 +1,16 @@
 package rlze.bancodigitalapi.infrastructure.adapters.in.web;
 
+import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import rlze.bancodigitalapi.domain.model.Conta;
+import org.springframework.web.server.ResponseStatusException;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ContaResponse;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.NovaContaRequest;
 import rlze.bancodigitalapi.application.ports.in.GestaoContaUseCase;
-import rlze.bancodigitalapi.infrastructure.adapters.out.persistence.mapper.ContaMapper;
 
+import java.security.InvalidParameterException;
 import java.util.List;
 
 @RestController
@@ -27,21 +28,23 @@ public class ContaController {
 
     @GetMapping
     public ResponseEntity<List<ContaResponse>> buscar(
-            @RequestParam(required = false, defaultValue = "") String nome) {
+            @RequestParam(required = false, defaultValue = "", value = "nomeTitular")
+            String nomeTitular,
+            // Injeta request bruto para validar queryParams
+            HttpServletRequest request) {
+
+        // Validação de parâmetros: Se houver mais de 1 parâmetro ou o parâmetro não for 'nomeTitular'
+        if (!request.getParameterMap().isEmpty() && !request.getParameterMap().containsKey("nomeTitular")
+                || request.getParameterMap().size() > 1) {
+
+            throw new InvalidParameterException("Parâmetros de busca inválidos. Use apenas 'nomeTitular'");
+        }
 
         // Se o nome não for enviado, ele busca por "" (string vazia), trazendo todos.
-        var contas = gestaoContaUseCase.listarPorNome(nome);
+        var contas = gestaoContaUseCase.listarPorNome(nomeTitular);
 
         return ResponseEntity.ok(contas.stream()
                 .map(ContaResponse::fromDomain)
                 .toList());
     }
-
-    /*@GetMapping("/{id}")
-    public ResponseEntity<ContaResponse> buscarPorId(@PathVariable String id) {
-        Conta conta = gestaoContaUseCase.buscarPorId(id);
-
-        // Converte o objeto de Domínio para o DTO de Resposta
-        return ResponseEntity.ok(ContaMapper.toResponse(conta));
-    }*/
 }
