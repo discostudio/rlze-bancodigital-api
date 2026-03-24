@@ -2,6 +2,13 @@
 
 API REST para gerenciamento de contas e movimentações financeiras.
 
+## 🚀 Como Executar o Projeto - via **Docker**
+
+1. Necessário: **Docker** instalado.
+2. Clone o repositório e acesse a pasta raiz.
+3. Utilize o comando `docker-compose up --build` para subir a aplicação **java** e o banco **MySQL**.
+4. Os testes podem ser executados nos endpoints via **Postman**.
+
 ## Tecnologias
 
 Java 21+  
@@ -37,63 +44,54 @@ src/main/java/com/bancodigital/
 │
 └── BancodigitalApplication.java
 
-## 🚀 Como Executar o Projeto - via **Docker**
-
-1. Necessário: **Docker** instalado.
-2. Clone o repositório e acesse a pasta raiz.
-3. Utilize o comando `docker-compose up --build` para subir a aplicação **java** e o banco **MySQL**.
-4. Os testes podem ser executados nos endpoints via **Postman**.
-
 ## Endpoints Principais
-Método ->	URL -> Descrição  
-POST ->	-> 
-POST ->	 ->	 
-POST ->  ->  
-GET ->  ->	 
-GET ->  ->	
+Método -> URL -> Descrição  
+POST ->	http://localhost:8080/v1/contas -> Cria uma conta  
+GET -> http://localhost:8080/v1/contas?nomeTitular=teste -> Pesquisa contas pelo nome do titular  	 
+GET -> http://localhost:8080/v1/contas -> Pesquisa contas (todas)  
+POST -> http://localhost:8080/v1/transferencias -> Realiza uma transferência entre contas  
+
+Documentação Swagger: http://localhost:8080/swagger-ui/index.html  
 
 ## Formato das Requisições/Respostas
-### Exemplo 1
+
+### Criar conta
 
 Request  
 {  
-"nome": "aaa",  
-"descricao": "aaa"  
+"nomeTitular": "Fabiano Moraes",  
+"saldo": 80  
 }
 
-Response
-{  
-"id": 1,  
-"nome": "aa",  
-"descricao": "aa"
-}
-
-### Resultado Detalhado da Pauta
+### Pesquisar contas
 
 Response  
+[  
 {  
-"pautaId": 1,  
-"totalSim": 5,  
-"totalNao": 3,  
-"totalVotos": 8,  
-"resultado": "SIM",  
-"sessoesAbertas": false,  
-"resultadosPorSessao": [  
-{  
-"sessaoId": 1,  
-"totalSim": 3,  
-"totalNao": 2,  
-"resultado": "SIM",  
-"aberta": false  
+"id": "16e718b4-5449-4ba8-99b7-cad4d1d96d6f",  
+"nomeTitular": "Fabiano Moraes",  
+"saldo": 80.00  
 },  
 {  
-"sessaoId": 2,  
-"totalSim": 2,  
-"totalNao": 1,  
-"resultado": "SIM",  
-"aberta": false  
+"id": "506dc261-2730-11f1-9746-8e822b232c7c",  
+"nomeTitular": "Joaquim Silveira",  
+"saldo": 900.00  
+},  
+{  
+"id": "506dcb41-2730-11f1-9746-8e822b232c7c",  
+"nomeTitular": "Bob Silva",  
+"saldo": 600.00  
 }  
-]}
+]  
+
+### Realizar transferência
+
+Request  
+{  
+"idContaOrigem": "506dc261-2730-11f1-9746-8e822b232c7",  
+"idContaDestino": "506dcb41-2730-11f1-9746-8e822b232c7c",  
+"valor": 10  
+}  
 
 ## ==> DECISÕES DE DESIGN E ARQUITETURA
 
@@ -101,18 +99,15 @@ Response
 Optei por uma versão pragmática da Arquitetura Hexagonal para garantir o desacoplamento entre a lógica de negócio e os detalhes de infraestrutura.  
 
 - Domínio Isolado: O núcleo (domain) não conhece frameworks como JPA ou Web. Isso facilita testes unitários puros, rápidos e sem necessidade de subir o contexto do Spring.  
-- Portas e Adaptadores: A comunicação com o mundo externo é feita através de interfaces (ports). Se amanhã decidirmos trocar o MySQL por MongoDB ou enviar notificações via Kafka em vez de e-mail, alteramos apenas o adaptador na camada de infrastructure, sem tocar na regra de transferência.  
+- Portas e Adaptadores: A comunicação com o mundo externo é feita através de interfaces (ports). Se amanhã precisar trocar o MySQL por MongoDB ou enviar notificações via Kafka em vez de Spring, alteramos apenas o adaptador na camada de infrastructure, sem tocar na regra de transferência.  
 
 ### Evolução de schema com Flyway  
-O uso do Flyway foi adotado para:  
-
-- Versionamento de Banco: Garantir que todos os ambientes (Desenvolvimento, Teste, Produção) estejam na mesma versão do schema.
-- Imutabilidade: Scripts de migração (V1, V2...) garantem que o histórico de mudanças seja preservado, evitando o uso de ddl-auto: update, que é perigoso em ambientes produtivos.
+O uso do Flyway foi adotado para garantir versionamento do banco, preservação de histórico, imutabilidade e consistência de dados no banco.  
 
 ### Consistência e Concorrência
 Para garantir a integridade dos saldos sem sacrificar a performance com bloqueios pesados no banco de dados, adotei o Locking Otimista:   
 
-Implementação: Utilize Atributo version (INT) na tabela contas e a anotação @Version do JPA na ContaEntity.  
+Implementação: atributo version na tabela "contas" e a anotação @Version do JPA na "ContaEntity".  
 
 Funcionamento: Toda vez que uma conta é lida, o JPA guarda sua versão. No momento do UPDATE, o Hibernate executa um SQL similar a:  
 UPDATE contas SET saldo = ?, version = 1 WHERE id = ? AND version = 0;  
@@ -125,11 +120,10 @@ Propriedades ACID: Toda a lógica de transferência é envolvida pela anotação
 ### Sistema de Notificações  
 Para atender ao requisito de notificação pós-transferência, implementei uma solução baseada em Spring Application Events com execução assíncrona (@Async).  
 
-Decisão de Arquitetura: Por que não Kafka ou RabbitMQ?  
-Embora mensageria externa (como Kafka ou RabbitMQ) seja o padrão para sistemas de larga escala, para este desafio optei pelo Spring Events pelos seguintes motivos:  
-Redução de Sobrecarga (YAGNI): Introduzir um broker de mensagens externo apenas para uma notificação simples aumentaria a complexidade de infraestrutura desnecessariamente (mais um container Docker, configuração de tópicos, serialização, etc.).  
-Consistência dentro da JVM: O Spring Events permite que a notificação seja disparada imediatamente após o commit da transação, mantendo o rastro de execução dentro da mesma aplicação.  
-Desacoplamento de Domínio: O TransferenciaService não conhece o mecanismo de notificação. Ele apenas publica um evento. Isso permite que, no futuro, possamos trocar o listener local por um KafkaProducer sem alterar uma única linha da regra de negócio.  
+Optei por não utilizar uma solução como Kafka ou RabbitMQ visando a evitar aumentar a complexidade (necessidade de mais um container, configuração de tópico, serialização).     
+
+Mesmo assim, entendo que as premissas principais são atendidas:  
+Desacoplamento de Domínio: O TransferenciaService não conhece o mecanismo de notificação. Ele apenas publica um evento. Isso permite que, no futuro, possamos trocar o listener local por um KafkaProducer sem alterar uma única linha da regra de negócio.    
 Performance: O uso da anotação @Async garante que o thread principal da API não fique bloqueado aguardando o envio da notificação, mantendo a baixa latência da resposta para o usuário.  
 
 
@@ -141,13 +135,13 @@ Performance: O uso da anotação @Async garante que o thread principal da API n�
 -> Flyway para tabela Contas e registros iniciais  
 -> Controllers, Services e repositories (ports e adapters): consultar contas e criar nova conta  
 
-3 - Implementação inicial do escopo de transferência entre contas
+3 - Implementação inicial do escopo de transferência entre contas  
 -> Controllers, Services e repositories (ports e adapters): debitar, creditar, realizar transferência  
 
 4 - Implementação inicial sistema de notificação de transferências  
 -> Spring Application event (notifier e listener)  
 
-5 - Testes unitários
+5 - Testes unitários  
 -> Testes básicos nas classes usecase (conta e transferencia) e model (conta)  
 
 6 - Documentação swagger  
@@ -162,20 +156,12 @@ Performance: O uso da anotação @Async garante que o thread principal da API n�
 ## Melhorias futuras recomendadas
 
 Maior cobertura de testes unitários.  
+
 Análise estática de código (com SonarQube, por exemplo).  
+
 Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item.  
-Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.
 
-## Validações / Exceções
-
-Campos obrigatórios não podem ser nulos ou vazios.
-
-## Observações
-
-Configurações de URLs e porta podem ser ajustadas via application.yml.  
-Segurança das APIs foi abstraída para fins de teste.  
-Todos os endpoints usam JSON para entrada e saída.  
-A aplicação pode ser testada com Postman ou qualquer cliente HTTP.
+Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.  
 
 ---
 Desenvolvido por Fernando Cardoso.
