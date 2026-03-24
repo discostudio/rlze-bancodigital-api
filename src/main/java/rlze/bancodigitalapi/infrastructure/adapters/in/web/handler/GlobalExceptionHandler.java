@@ -45,20 +45,6 @@ public class GlobalExceptionHandler {
     }
 
     // 400 - Bad Request - campos inválidos
-    /*@ExceptionHandler(HttpMessageNotReadableException.class)
-    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
-        // Verifica se a causa da falha no JSON foi uma IllegalArgumentException (lançada pelo Record)
-        Throwable rootCause = ex.getRootCause();
-
-        if (ex.getRootCause() instanceof IllegalArgumentException) {
-            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                    .body(new ErrorResponse("INVALID_PARAMETER", rootCause.getMessage()));
-        }
-
-        // Se for outro erro de JSON (syntax, campos desconhecidos), mantém a mensagem genérica
-        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
-                .body(new ErrorResponse("INVALID_JSON", "O payload enviado contém campos desconhecidos ou formato inválido."));
-    }*/
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
         String message = "Erro na leitura do JSON.";
