@@ -1,9 +1,12 @@
 package rlze.bancodigitalapi.infrastructure.adapters.in.web.handler;
 
+import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.orm.ObjectOptimisticLockingFailureException;
+import org.springframework.validation.FieldError;
+import org.springframework.web.bind.MethodArgumentNotValidException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
@@ -12,7 +15,10 @@ import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ErrorResponse;
 
 import java.security.InvalidParameterException;
 import java.time.LocalDateTime;
+import java.util.HashMap;
+import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
 
 @ControllerAdvice
 public class GlobalExceptionHandler {
@@ -39,7 +45,7 @@ public class GlobalExceptionHandler {
     }
 
     // 400 - Bad Request - campos inválidos
-    @ExceptionHandler(HttpMessageNotReadableException.class)
+    /*@ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
         // Verifica se a causa da falha no JSON foi uma IllegalArgumentException (lançada pelo Record)
         Throwable rootCause = ex.getRootCause();
@@ -52,6 +58,46 @@ public class GlobalExceptionHandler {
         // Se for outro erro de JSON (syntax, campos desconhecidos), mantém a mensagem genérica
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_JSON", "O payload enviado contém campos desconhecidos ou formato inválido."));
+    }*/
+    @ExceptionHandler(HttpMessageNotReadableException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
+        String message = "Erro na leitura do JSON.";
+        Map<String, String> details = new HashMap<>();
+
+        Throwable rootCause = ex.getRootCause();
+
+        // 1. Se o erro for um campo com tipo errado (ex: enviar String onde era pra ser Double)
+        if (rootCause instanceof com.fasterxml.jackson.databind.exc.InvalidFormatException ife) {
+            String fieldName = ife.getPath().stream()
+                    .map(com.fasterxml.jackson.databind.JsonMappingException.Reference::getFieldName)
+                    .collect(java.util.stream.Collectors.joining("."));
+
+            message = "Valor inválido para o campo: " + fieldName;
+            details.put(fieldName, "O valor '" + ife.getValue() + "' não é compatível com o tipo esperado (" + ife.getTargetType().getSimpleName() + ")");
+        }
+        else if (rootCause instanceof com.fasterxml.jackson.core.JsonParseException jpe) {
+            message = "Parâmetro inválido. Revise os tipos informados.";
+            //details.put("causa", "Formato de dado inválido detectado próximo a: " + jpe.getProcessor().toString());
+        }
+        // 2. Se o erro for propriedade desconhecida ('fail-on-unknown-properties: true' configurado no application.yml)
+        else if (rootCause instanceof com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException upe) {
+            String fieldName = upe.getPropertyName();
+            message = "Propriedade não reconhecida.";
+            details.put(fieldName, "Este campo não existe no contrato da API.");
+        }
+        // 3. Se for erro de sintaxe bruta (ex: faltou uma vírgula ou aspas)
+        else {
+            message = "O payload enviado contém erro de sintaxe ou formato inválido.";
+        }
+
+        ErrorResponse errorBody = new ErrorResponse(
+                "INVALID_JSON",
+                message,
+                LocalDateTime.now(),
+                details.isEmpty() ? null : details
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 
     @ExceptionHandler(InvalidParameterException.class)
@@ -64,5 +110,28 @@ public class GlobalExceptionHandler {
     public ResponseEntity<ErrorResponse> handleInvalidParameter(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
+    }
+
+    @ExceptionHandler(MethodArgumentNotValidException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidParameter(MethodArgumentNotValidException ex) {
+        // 1. Criamos um mapa com Nome do Campo -> Mensagem de Erro
+        Map<String, String> detalhesDosErros = ex.getBindingResult()
+                .getFieldErrors()
+                .stream()
+                .collect(Collectors.toMap(
+                        FieldError::getField,
+                        error -> error.getDefaultMessage() != null ? error.getDefaultMessage() : "Valor inválido",
+                        (existente, novo) -> existente + " e " + novo // Caso o mesmo campo tenha 2 erros (ex: @NotNull e @Positive)
+                ));
+
+        // 2. Criamos o ErrorResponse usando o seu construtor completo
+        ErrorResponse errorBody = new ErrorResponse(
+                "INVALID_PARAMETER",
+                "Um ou mais campos possuem erros de validação.",
+                LocalDateTime.now(),
+                detalhesDosErros
+        );
+
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST).body(errorBody);
     }
 }

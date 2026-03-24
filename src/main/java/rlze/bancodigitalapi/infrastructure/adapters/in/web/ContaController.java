@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
+import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -47,7 +48,7 @@ public class ContaController {
     })
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
-    public void criar(@RequestBody NovaContaRequest request) {
+    public void criar(@Valid @RequestBody NovaContaRequest request) {
         gestaoContaUseCase.criarConta(request.nomeTitular(), request.saldo());
     }
 
