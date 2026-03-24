@@ -29,6 +29,11 @@ public class TransferenciaService implements TransferenciaUseCase {
         Conta origem = contaRepositoryPort.buscarPorId(request.idContaOrigem())
                 .orElseThrow(() -> new EntityNotFoundException("Conta de origem não encontrada."));
 
+        // Verifica se é a mesma conta
+        if (origem.getId().equals(request.idContaDestino())) {
+            throw new BusinessException("A conta de origem não pode ser igual à conta de destino.");
+        }
+
         Conta destino = contaRepositoryPort.buscarPorId(request.idContaDestino())
                 .orElseThrow(() -> new EntityNotFoundException("Conta de destino não encontrada."));
 

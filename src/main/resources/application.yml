@@ -1,9 +1,16 @@
 spring:
   datasource:
-    url: jdbc:mysql://localhost:3306/bancodigital_db
-    username: bancodigital
-    password: bancodigital
+    #url: jdbc:mysql://localhost:3306/bancodigital_db
+    #username: bancodigital
+    #password: bancodigital
     driver-class-name: com.mysql.cj.jdbc.Driver
+
+    url: ${SPRING_DATASOURCE_URL:jdbc:mysql://localhost:3306/bancodigital_db?createDatabaseIfNotExist=true}
+    username: ${SPRING_DATASOURCE_USERNAME:bancodigital}
+    password: ${SPRING_DATASOURCE_PASSWORD:bancodigital}
+
+    hikari:
+      initialization-fail-timeout: 12000 # Faz o Spring tentar conectar por até 12s antes de desistir (se a API subir muito rápido e o banco ainda estiver criando as tabelas, ela pode falhar)
 
   jackson:
     deserialization:
