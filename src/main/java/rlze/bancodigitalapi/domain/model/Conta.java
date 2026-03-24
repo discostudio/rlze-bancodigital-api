@@ -53,7 +53,6 @@ public class Conta {
         }
         if (this.saldo.compareTo(valor) < 0) {
             throw new BusinessException("Saldo insuficiente na conta: " + this.id);
-
         }
         this.saldo = this.saldo.subtract(valor);
     }

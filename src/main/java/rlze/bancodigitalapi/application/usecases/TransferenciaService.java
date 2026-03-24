@@ -7,9 +7,13 @@ import org.springframework.stereotype.Service;
 import rlze.bancodigitalapi.application.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.in.TransferenciaUseCase;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
+import rlze.bancodigitalapi.domain.event.CreditoRealizadoEvent;
+import rlze.bancodigitalapi.domain.event.DebitoRealizadoEvent;
 import rlze.bancodigitalapi.domain.event.TransferenciaRealizadaEvent;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
 import rlze.bancodigitalapi.domain.model.Conta;
+
+import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor
@@ -41,11 +45,19 @@ public class TransferenciaService implements TransferenciaUseCase {
 
         System.out.println("Transferência de R$ " + request.valor() + " concluída com sucesso!");
 
-        // Dispara o evento: O Spring vai procurar quem está "ouvindo"
+        // Dispara as notificações (publica eventos para serem consumidos)
         eventPublisher.publishEvent(new TransferenciaRealizadaEvent(
                 origem.getId(),
                 destino.getId(),
                 request.valor()
         ));
+        eventPublisher.publishEvent(new DebitoRealizadoEvent(
+                origem.getId(),
+                request.valor(),
+                origem.getSaldo()));
+        eventPublisher.publishEvent(new CreditoRealizadoEvent(
+                destino.getId(),
+                request.valor(),
+                destino.getSaldo()));
     }
 }
