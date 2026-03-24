@@ -1,4 +1,4 @@
-package rlze.bancodigitalapi.application.usecases;
+package rlze.bancodigitalapi.application.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -13,8 +13,6 @@ import rlze.bancodigitalapi.domain.model.Conta;
 
 import java.math.BigDecimal;
 import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertNotNull;

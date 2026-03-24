@@ -1,4 +1,4 @@
-package rlze.bancodigitalapi.application.usecases;
+package rlze.bancodigitalapi.application.service;
 
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -7,7 +7,7 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.context.ApplicationEventPublisher;
-import rlze.bancodigitalapi.application.dto.TransferenciaRequest;
+import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
 import rlze.bancodigitalapi.domain.event.CreditoRealizadoEvent;
 import rlze.bancodigitalapi.domain.event.DebitoRealizadoEvent;

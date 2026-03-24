@@ -1,10 +1,10 @@
-package rlze.bancodigitalapi.application.usecases;
+package rlze.bancodigitalapi.application.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
-import rlze.bancodigitalapi.application.dto.TransferenciaRequest;
+import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.in.TransferenciaUseCase;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
 import rlze.bancodigitalapi.domain.event.CreditoRealizadoEvent;
@@ -12,8 +12,6 @@ import rlze.bancodigitalapi.domain.event.DebitoRealizadoEvent;
 import rlze.bancodigitalapi.domain.event.TransferenciaRealizadaEvent;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
 import rlze.bancodigitalapi.domain.model.Conta;
-
-import java.math.BigDecimal;
 
 @Service
 @RequiredArgsConstructor

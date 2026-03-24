@@ -1,4 +1,4 @@
-package rlze.bancodigitalapi.application.dto;
+package rlze.bancodigitalapi.infrastructure.adapters.in.web.dto;
 
 import java.math.BigDecimal;
 

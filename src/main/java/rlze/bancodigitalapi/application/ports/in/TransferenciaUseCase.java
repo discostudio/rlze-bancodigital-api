@@ -1,6 +1,6 @@
 package rlze.bancodigitalapi.application.ports.in;
 
-import rlze.bancodigitalapi.application.dto.TransferenciaRequest;
+import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.TransferenciaRequest;
 
 public interface TransferenciaUseCase {
 

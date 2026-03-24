@@ -1,4 +1,4 @@
-package rlze.bancodigitalapi.application.usecases;
+package rlze.bancodigitalapi.application.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;

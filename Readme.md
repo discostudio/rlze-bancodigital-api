@@ -145,10 +145,21 @@ Performance: O uso da anotação @Async garante que o thread principal da API n�
 -> Controllers, Services e repositories (ports e adapters): debitar, creditar, realizar transferência  
 
 4 - Implementação inicial sistema de notificação de transferências  
--> Spring Application event (notifier e listener)
+-> Spring Application event (notifier e listener)  
+
+5 - Testes unitários
+-> Testes básicos nas classes usecase (conta e transferencia) e model (conta)  
+
+6 - Documentação swagger  
+
+7 - Logs básicos  
+
+8 - Teste end2end  
+-> ajustes códigos HTTP de retorno em cenários de erro  
 
 
-## Melhorias futuras
+
+## Melhorias futuras recomendadas
 
 Maior cobertura de testes unitários.  
 Análise estática de código (com SonarQube, por exemplo).  
@@ -157,18 +168,7 @@ Observabilidade e monitoramento: métricas padrão via actuator, métricas custo
 
 ## Validações / Exceções
 
-Campos obrigatórios não podem ser nulos ou vazios.  
-Apenas votos "SIM" ou "NÃO" são aceitos.  
-Associado só pode votar uma vez por pauta.  
-Não é possível abrir mais de uma sessão ativa por pauta.  
-Se não houver votos registrados, retorna erro 404 com mensagem informativa.  
-Exceções retornam JSON no formato:
-{  
-"message": "Descrição do erro",  
-"fieldErrors": {  
-"campo": "Mensagem do erro"  
-}  
-}
+Campos obrigatórios não podem ser nulos ou vazios.
 
 ## Observações
 
