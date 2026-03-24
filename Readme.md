@@ -159,7 +159,7 @@ Maior cobertura de testes unitários.
 
 Análise estática de código (com SonarQube, por exemplo).  
 
-Testes de performance (com JMeter, por exemplo), quantificando a necessidade de ajustes de arquitetura e escalabilidade citados no próximo item.  
+Testes de performance (com JMeter, por exemplo), quantificando eventual necessidade de ajustes de arquitetura e escalabilidade.  
 
 Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.  
 
