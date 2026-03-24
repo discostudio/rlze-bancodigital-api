@@ -4,6 +4,7 @@ import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
+import rlze.bancodigitalapi.domain.exception.EntityNotFoundException;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.in.TransferenciaUseCase;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
@@ -26,10 +27,10 @@ public class TransferenciaService implements TransferenciaUseCase {
     public void executarTransferencia(TransferenciaRequest request) {
         // 1. Recupera as contas (Domain objects)
         Conta origem = contaRepositoryPort.buscarPorId(request.idContaOrigem())
-                .orElseThrow(() -> new BusinessException("Conta de origem não encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Conta de origem não encontrada."));
 
         Conta destino = contaRepositoryPort.buscarPorId(request.idContaDestino())
-                .orElseThrow(() -> new BusinessException("Conta de destino não encontrada."));
+                .orElseThrow(() -> new EntityNotFoundException("Conta de destino não encontrada."));
 
         // 2. Executa a regra de negócio no Domínio
         origem.debitar(request.valor());

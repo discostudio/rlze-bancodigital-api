@@ -4,9 +4,11 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import rlze.bancodigitalapi.domain.model.Conta;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ContaResponse;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.NovaContaRequest;
 import rlze.bancodigitalapi.application.ports.in.GestaoContaUseCase;
+import rlze.bancodigitalapi.infrastructure.adapters.out.persistence.mapper.ContaMapper;
 
 import java.util.List;
 
@@ -34,4 +36,12 @@ public class ContaController {
                 .map(ContaResponse::fromDomain)
                 .toList());
     }
+
+    /*@GetMapping("/{id}")
+    public ResponseEntity<ContaResponse> buscarPorId(@PathVariable String id) {
+        Conta conta = gestaoContaUseCase.buscarPorId(id);
+
+        // Converte o objeto de Domínio para o DTO de Resposta
+        return ResponseEntity.ok(ContaMapper.toResponse(conta));
+    }*/
 }

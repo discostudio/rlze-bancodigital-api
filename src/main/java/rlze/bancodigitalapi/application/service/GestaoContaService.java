@@ -5,6 +5,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import rlze.bancodigitalapi.application.ports.in.GestaoContaUseCase;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
+import rlze.bancodigitalapi.domain.exception.EntityNotFoundException;
 import rlze.bancodigitalapi.domain.model.Conta;
 
 import java.math.BigDecimal;
@@ -26,6 +27,13 @@ public class GestaoContaService implements GestaoContaUseCase {
 
     @Override
     public List<Conta> listarPorNome(String nome) {
-        return contaRepositoryPort.buscarPorNome(nome);
+        List<Conta> contas = contaRepositoryPort.buscarPorNome(nome);;
+
+        // Se a lista vier nula ou vazia, lançamos o 404
+        if (contas == null || contas.isEmpty()) {
+            throw new EntityNotFoundException("Nenhuma conta encontrada para o nome: " + nome);
+        }
+
+        return contas;
     }
 }

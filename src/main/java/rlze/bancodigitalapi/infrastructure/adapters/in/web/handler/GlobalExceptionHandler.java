@@ -2,9 +2,12 @@ package rlze.bancodigitalapi.infrastructure.adapters.in.web.handler;
 
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.orm.ObjectOptimisticLockingFailureException;
 import org.springframework.web.bind.annotation.ControllerAdvice;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
+import rlze.bancodigitalapi.domain.exception.EntityNotFoundException;
+import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ErrorResponse;
 
 import java.time.LocalDateTime;
 import java.util.Map;
@@ -12,7 +15,7 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(BusinessException.class)
+    /*@ExceptionHandler(BusinessException.class)
     public ResponseEntity<Object> handleBusinessException(BusinessException ex) {
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
                 "timestamp", LocalDateTime.now(),
@@ -29,5 +32,26 @@ public class GlobalExceptionHandler {
                 "timestamp", LocalDateTime.now(),
                 "message", "A conta foi atualizada por outra operação. Tente novamente."
         ));
+    }*/
+
+    // 404 - Não Encontrado
+    @ExceptionHandler(EntityNotFoundException.class)
+    public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
+        return ResponseEntity.status(HttpStatus.NOT_FOUND)
+                .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
+    }
+
+    // 422 - Erro de Negócio (Saldo, limite, etc)
+    @ExceptionHandler(BusinessException.class)
+    public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
+        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
+                .body(new ErrorResponse("BUSINESS_ERROR", ex.getMessage()));
+    }
+
+    // 409 - Conflito (Optimistic Locking)
+    @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
+    public ResponseEntity<ErrorResponse> handleConflict(ObjectOptimisticLockingFailureException ex) {
+        return ResponseEntity.status(HttpStatus.CONFLICT)
+                .body(new ErrorResponse("CONCURRENCY_ERROR", "A conta foi atualizada por outra operação. Tente novamente."));
     }
 }
