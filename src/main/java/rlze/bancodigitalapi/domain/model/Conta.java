@@ -4,7 +4,9 @@ import lombok.Getter;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
 
 import java.math.BigDecimal;
+import java.time.Clock;
 import java.time.LocalDateTime;
+import java.time.temporal.ChronoUnit;
 import java.util.UUID;
 
 @Getter
@@ -22,7 +24,8 @@ public class Conta {
         this.nomeTitular = nomeTitular;
         this.saldo = (saldoInicial != null) ? saldoInicial : BigDecimal.ZERO;
         this.version = 0;
-        this.criadoEm = LocalDateTime.now();
+        //this.criadoEm = LocalDateTime.now(Clock.systemUTC()).truncatedTo(ChronoUnit.SECONDS);
+        this.criadoEm = LocalDateTime.now(Clock.systemUTC());
     }
 
     // 2. NOVO: Construtor para conta EXISTENTE (Usado pelo Mapper)
