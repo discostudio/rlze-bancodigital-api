@@ -1,6 +1,7 @@
 package rlze.bancodigitalapi.domain.model;
 
 import lombok.Getter;
+import rlze.bancodigitalapi.domain.exception.BusinessException;
 
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
@@ -43,5 +44,21 @@ public class Conta {
         }
     }*/
 
-    // GETTERS
+    public void debitar(BigDecimal valor) {
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("O valor do débito deve ser positivo.");
+        }
+        if (this.saldo.compareTo(valor) < 0) {
+            throw new BusinessException("Saldo insuficiente na conta: " + this.id);
+
+        }
+        this.saldo = this.saldo.subtract(valor);
+    }
+
+    public void creditar(BigDecimal valor) {
+        if (valor.compareTo(BigDecimal.ZERO) <= 0) {
+            throw new BusinessException("O valor do crédito deve ser positivo.");
+        }
+        this.saldo = this.saldo.add(valor);
+    }
 }

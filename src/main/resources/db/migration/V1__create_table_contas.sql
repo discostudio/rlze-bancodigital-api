@@ -7,12 +7,8 @@ CREATE TABLE contas (
     atualizado_em TIMESTAMP NULL
 );
 
--- Dados iniciais (UUID() gera o ID no MySQL)
 INSERT INTO contas (id, nome_titular, saldo, version, criado_em)
-VALUES (UUID(), 'Joaquim Silveira', 1000.00, 0, UTC_TIMESTAMP());
-
-INSERT INTO contas (id, nome_titular, saldo, version, criado_em)
-VALUES (UUID(), 'Bob Silva', 500.00, 0, UTC_TIMESTAMP());
-
-INSERT INTO contas (id, nome_titular, saldo, version, criado_em)
-VALUES (UUID(), 'Joana Oliveira', 100.00, 0, UTC_TIMESTAMP());
+VALUES
+    (UUID(), 'Joaquim Silveira', 1000.00, 0, UTC_TIMESTAMP()),
+    (UUID(), 'Bob Silva', 500.00, 0, UTC_TIMESTAMP()),
+    (UUID(), 'Joana Oliveira', 100.00, 0, UTC_TIMESTAMP());

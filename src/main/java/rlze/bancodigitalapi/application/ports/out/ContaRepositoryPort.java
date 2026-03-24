@@ -9,5 +9,5 @@ public interface ContaRepositoryPort {
 
     void salvar(Conta conta);
     List<Conta> buscarPorNome(String nome);
-    //Optional<Conta> buscarPorId(String id);
+    Optional<Conta> buscarPorId(String id);
 }

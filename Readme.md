@@ -110,14 +110,26 @@ O uso do Flyway foi adotado para:
 - Imutabilidade: Scripts de migração (V1, V2...) garantem que o histórico de mudanças seja preservado, evitando o uso de ddl-auto: update, que é perigoso em ambientes produtivos.
 
 ### Consistência e Concorrência
-Para o escopo de transferência entre contas, implementei:
+Para garantir a integridade dos saldos sem sacrificar a performance com bloqueios pesados no banco de dados, adotei o Locking Otimista:   
 
-- Optimistic Locking: na tabela "contas" existe uma coluna version. No Java, utilizei a anotação @Version do JPA. Isso evita o "Lost Update" — se dois processos tentarem sacar da mesma conta ao mesmo tempo, o JPA garantirá que apenas um vença, lançando uma ObjectOptimisticLockingFailureException no segundo.
+Implementação: Utilize Atributo version (INT) na tabela contas e a anotação @Version do JPA na ContaEntity.  
 
+Funcionamento: Toda vez que uma conta é lida, o JPA guarda sua versão. No momento do UPDATE, o Hibernate executa um SQL similar a:  
+UPDATE contas SET saldo = ?, version = 1 WHERE id = ? AND version = 0;  
+
+Vantagem: Se dois processos tentarem sacar da mesma conta ao mesmo tempo, o primeiro a chegar incrementará a versão. O segundo processo falhará ao tentar dar o UPDATE (pois a versão 0 não existe mais), lançando uma ObjectOptimisticLockingFailureException. Isso impede o fenômeno de Lost Update (atualização perdida) e garante que o saldo final esteja sempre correto.
 
 ## ==> JOURNAL (passo a passo da implementação):
 
-1 - Criação do repositório no github, com initial commit simulando scaffolding básico com configuração de banco e estrutura de pastas.
+1 - Criação do repositório no github, com initial commit simulando scaffolding básico com configuração de banco e estrutura de pastas.  
+
+2 - Implementação inicial do escopo de CONTA  
+-> Flyway para tabela Contas e registros iniciais  
+-> Controllers, Services e repositories (ports e adapters): consultar contas e criar nova conta  
+
+3 - Implementação inicial do escopo de transferência entre contas
+-> Controllers, Services e repositories (ports e adapters): debitar, creditar, realizar transferência
+
 
 ## Melhorias futuras
 
