@@ -21,14 +21,14 @@ Maven
 ## Estrutura do Projeto
 src/main/java/com/bancodigital/  
 │  
-├── application/                # Casos de Uso (Orquestração)  
-│   ├── dto/                    # Requests/Responses da API  
-│   ├── ports/  
-│   │   ├── in/                 # Interfaces de entrada (Use Cases)  
-│   │   └── out/                # Interfaces de saída (Gateways/Repositórios)  
-│   └── usecases/               # Implementação da lógica de aplicação  
+├── **application/**                # Casos de Uso (Orquestração)  
+│   ├── **dto/**                    # Requests/Responses da API  
+│   ├── **ports/**  
+│   │   ├── **in/**                 # Interfaces de entrada (Use Cases)  
+│   │   └── **out/**                # Interfaces de saída (Gateways/Repositórios)  
+│   └── **usecases/**               # Implementação da lógica de aplicação  
 │  
-├── domain/                     # O Coração (Regras de Negócio Puristas)  
+├── **domain/**                     # O Coração (Regras de Negócio Puristas)  
 │   ├── model/                  # Entidades de Domínio (Ricas em comportamento)  
 │   ├── exception/              # Exceções de negócio (ex: SaldoInsuficienteException)  
 │   └── service/                # Domain Services (Lógica que envolve múltiplas entidades)  
@@ -45,19 +45,19 @@ src/main/java/com/bancodigital/
 └── BancodigitalApplication.java
 
 ## Endpoints Principais
-Método -> URL -> Descrição  
-POST ->	http://localhost:8080/v1/contas -> Cria uma conta  
-GET -> http://localhost:8080/v1/contas?nomeTitular=teste -> Pesquisa contas pelo nome do titular  	 
-GET -> http://localhost:8080/v1/contas -> Pesquisa contas (todas)  
-POST -> http://localhost:8080/v1/transferencias -> Realiza uma transferência entre contas  
+**Método -> URL -> Descrição**  
+**POST** ->	http://localhost:8080/v1/contas -> Cria uma conta  
+**GET** -> http://localhost:8080/v1/contas?nomeTitular=teste -> Pesquisa contas pelo nome do titular  	 
+**GET** -> http://localhost:8080/v1/contas -> Pesquisa contas (todas)  
+**POST** -> http://localhost:8080/v1/transferencias -> Realiza uma transferência entre contas  
 
-Documentação Swagger: http://localhost:8080/swagger-ui/index.html  
+**Documentação Swagger:** http://localhost:8080/swagger-ui/index.html  
 
 ## Formato das Requisições/Respostas
 
 ### Criar conta
 
-Request  
+**Request**  
 {  
 "nomeTitular": "Fabiano Moraes",  
 "saldo": 80  
@@ -65,7 +65,7 @@ Request
 
 ### Pesquisar contas
 
-Response  
+**Response**  
 [  
 {  
 "id": "16e718b4-5449-4ba8-99b7-cad4d1d96d6f",  
@@ -86,7 +86,7 @@ Response
 
 ### Realizar transferência
 
-Request  
+**Request**  
 {  
 "idContaOrigem": "506dc261-2730-11f1-9746-8e822b232c7",  
 "idContaDestino": "506dcb41-2730-11f1-9746-8e822b232c7c",  
