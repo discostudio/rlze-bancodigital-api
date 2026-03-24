@@ -2,10 +2,12 @@ package rlze.bancodigitalapi.application.usecases;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import rlze.bancodigitalapi.application.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.in.TransferenciaUseCase;
 import rlze.bancodigitalapi.application.ports.out.ContaRepositoryPort;
+import rlze.bancodigitalapi.domain.event.TransferenciaRealizadaEvent;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
 import rlze.bancodigitalapi.domain.model.Conta;
 
@@ -14,6 +16,8 @@ import rlze.bancodigitalapi.domain.model.Conta;
 public class TransferenciaService implements TransferenciaUseCase {
 
     private final ContaRepositoryPort contaRepositoryPort;
+
+    private final ApplicationEventPublisher eventPublisher;
 
     @Override
     @Transactional // Ponto vital: Garante a atomicidade da operação
@@ -36,5 +40,12 @@ public class TransferenciaService implements TransferenciaUseCase {
         contaRepositoryPort.salvar(destino);
 
         System.out.println("Transferência de R$ " + request.valor() + " concluída com sucesso!");
+
+        // Dispara o evento: O Spring vai procurar quem está "ouvindo"
+        eventPublisher.publishEvent(new TransferenciaRealizadaEvent(
+                origem.getId(),
+                destino.getId(),
+                request.valor()
+        ));
     }
 }

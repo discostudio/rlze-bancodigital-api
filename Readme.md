@@ -119,6 +119,20 @@ UPDATE contas SET saldo = ?, version = 1 WHERE id = ? AND version = 0;
 
 Vantagem: Se dois processos tentarem sacar da mesma conta ao mesmo tempo, o primeiro a chegar incrementará a versão. O segundo processo falhará ao tentar dar o UPDATE (pois a versão 0 não existe mais), lançando uma ObjectOptimisticLockingFailureException. Isso impede o fenômeno de Lost Update (atualização perdida) e garante que o saldo final esteja sempre correto.
 
+### Transacionalidade e Atomicidade
+Propriedades ACID: Toda a lógica de transferência é envolvida pela anotação @Transactional. Se o débito na conta de origem for bem-sucedido, mas o crédito na conta de destino falhar (ou o sistema cair), o banco realiza o rollback automático, garantindo que o dinheiro nunca "desapareça".
+
+### Sistema de Notificações  
+Para atender ao requisito de notificação pós-transferência, implementei uma solução baseada em Spring Application Events com execução assíncrona (@Async).  
+
+Decisão de Arquitetura: Por que não Kafka ou RabbitMQ?  
+Embora mensageria externa (como Kafka ou RabbitMQ) seja o padrão para sistemas de larga escala, para este desafio optei pelo Spring Events pelos seguintes motivos:  
+Redução de Sobrecarga (YAGNI): Introduzir um broker de mensagens externo apenas para uma notificação simples aumentaria a complexidade de infraestrutura desnecessariamente (mais um container Docker, configuração de tópicos, serialização, etc.).  
+Consistência dentro da JVM: O Spring Events permite que a notificação seja disparada imediatamente após o commit da transação, mantendo o rastro de execução dentro da mesma aplicação.  
+Desacoplamento de Domínio: O TransferenciaService não conhece o mecanismo de notificação. Ele apenas publica um evento. Isso permite que, no futuro, possamos trocar o listener local por um KafkaProducer sem alterar uma única linha da regra de negócio.  
+Performance: O uso da anotação @Async garante que o thread principal da API não fique bloqueado aguardando o envio da notificação, mantendo a baixa latência da resposta para o usuário.  
+
+
 ## ==> JOURNAL (passo a passo da implementação):
 
 1 - Criação do repositório no github, com initial commit simulando scaffolding básico com configuração de banco e estrutura de pastas.  
@@ -128,7 +142,10 @@ Vantagem: Se dois processos tentarem sacar da mesma conta ao mesmo tempo, o prim
 -> Controllers, Services e repositories (ports e adapters): consultar contas e criar nova conta  
 
 3 - Implementação inicial do escopo de transferência entre contas
--> Controllers, Services e repositories (ports e adapters): debitar, creditar, realizar transferência
+-> Controllers, Services e repositories (ports e adapters): debitar, creditar, realizar transferência  
+
+4 - Implementação inicial sistema de notificação de transferências  
+-> Spring Application event (notifier e listener)
 
 
 ## Melhorias futuras
