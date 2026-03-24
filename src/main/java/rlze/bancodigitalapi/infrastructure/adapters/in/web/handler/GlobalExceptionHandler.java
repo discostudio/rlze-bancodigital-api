@@ -17,25 +17,6 @@ import java.util.Map;
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
-    /*@ExceptionHandler(BusinessException.class)
-    public ResponseEntity<Object> handleBusinessException(BusinessException ex) {
-        return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY).body(Map.of(
-                "timestamp", LocalDateTime.now(),
-                "status", HttpStatus.UNPROCESSABLE_ENTITY.value(),
-                "error", "Regra de Negócio",
-                "message", ex.getMessage()
-        ));
-    }
-
-    // Opcional: Tratar erro de concorrência (Lock Otimista) de forma amigável
-    @ExceptionHandler(org.springframework.orm.ObjectOptimisticLockingFailureException.class)
-    public ResponseEntity<Object> handleConflict(Exception ex) {
-        return ResponseEntity.status(HttpStatus.CONFLICT).body(Map.of(
-                "timestamp", LocalDateTime.now(),
-                "message", "A conta foi atualizada por outra operação. Tente novamente."
-        ));
-    }*/
-
     // 404 - Não Encontrado
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
@@ -57,14 +38,30 @@ public class GlobalExceptionHandler {
                 .body(new ErrorResponse("CONCURRENCY_ERROR", "A conta foi atualizada por outra operação. Tente novamente."));
     }
 
+    // 400 - Bad Request - campos inválidos
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
-        return ResponseEntity.badRequest()
-                .body(new ErrorResponse("INVALID_JSON", "O payload enviado contém campos desconhecidos ou inválidos."));
+        // Verifica se a causa da falha no JSON foi uma IllegalArgumentException (lançada pelo Record)
+        Throwable rootCause = ex.getRootCause();
+
+        if (ex.getRootCause() instanceof IllegalArgumentException) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                    .body(new ErrorResponse("INVALID_PARAMETER", rootCause.getMessage()));
+        }
+
+        // Se for outro erro de JSON (syntax, campos desconhecidos), mantém a mensagem genérica
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_JSON", "O payload enviado contém campos desconhecidos ou formato inválido."));
     }
 
-    @ExceptionHandler(InvalidParameterException.class) // Crie essa classe no domain.exception
+    @ExceptionHandler(InvalidParameterException.class)
     public ResponseEntity<ErrorResponse> handleInvalidParameter(InvalidParameterException ex) {
+        return ResponseEntity.status(HttpStatus.BAD_REQUEST)
+                .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
+    }
+
+    @ExceptionHandler(IllegalArgumentException.class)
+    public ResponseEntity<ErrorResponse> handleInvalidParameter(IllegalArgumentException ex) {
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
     }
