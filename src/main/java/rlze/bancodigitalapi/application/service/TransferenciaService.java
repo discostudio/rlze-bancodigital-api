@@ -59,6 +59,8 @@ public class TransferenciaService implements TransferenciaUseCase {
     }
 
     private void gerarEventos(String contaOrigemId, String contaDestinoId, BigDecimal valor, BigDecimal origemSaldo, BigDecimal destinoSaldo) {
+        log.info("TransferenciaService: gerarEventos()");
+
         // Evento transferência realizada
         eventPublisher.publishEvent(new TransferenciaRealizadaEvent(
                 contaOrigemId,
