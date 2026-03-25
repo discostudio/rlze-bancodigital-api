@@ -69,7 +69,7 @@ public class TransferenciaController {
     })
     @PostMapping
     public ResponseEntity<Void> transferir(@RequestBody TransferenciaRequest request) {
-        log.info("TranferenciaController: POST /v1/transferencias. Origem: {}. Destino {}", request.idContaOrigem(), request.idContaDestino());
+        log.info("POST /v1/transferencias. Origem: {}. Destino {}", request.idContaOrigem(), request.idContaDestino());
 
         transferenciaUseCase.executarTransferencia(request);
         return ResponseEntity.ok().build();

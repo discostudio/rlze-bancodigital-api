@@ -50,7 +50,7 @@ public class ContaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void criar(@Valid @RequestBody NovaContaRequest request) {
-        log.info("ContasController: POST /v1/contas. Nome: {}.", request.nomeTitular());
+        log.info("POST /v1/contas. Nome: {}.", request.nomeTitular());
 
         gestaoContaUseCase.criarConta(request.nomeTitular(), request.saldo());
     }
@@ -89,7 +89,7 @@ public class ContaController {
             String nomeTitular,
             // Injeta request bruto para validar queryParams
             HttpServletRequest request) {
-        log.info("ContasController: GET /v1/contas. Nome: {}.", nomeTitular);
+        log.info("GET /v1/contas. Nome: {}.", nomeTitular);
 
         // Validação de parâmetros: Se houver mais de 1 parâmetro ou o parâmetro não for 'nomeTitular'
         if (!request.getParameterMap().isEmpty() && !request.getParameterMap().containsKey("nomeTitular")

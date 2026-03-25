@@ -44,14 +44,14 @@ public class TransferenciaService implements TransferenciaUseCase {
         // 2. Executa a regra de negócio no Domínio
         origem.debitar(request.valor());
         destino.creditar(request.valor());
-        log.info("TransferenciaService: debitar(),creditar()");
+        log.info("debitar({}),creditar({})", origem.getId(), destino.getId());
 
         // 3. Persiste os novos estados
         // O JPA usará o @Version para garantir que ninguém alterou essas contas
         // entre o momento que lemos e o momento que salvamos (Optimistic Lock).
         contaRepositoryPort.salvar(origem);
         contaRepositoryPort.salvar(destino);
-        log.info("TransferenciaService: salvar()");
+        log.info("salvarTransferencia()");
 
 
         // Dispara as notificações (publica eventos para serem consumidos)
@@ -59,7 +59,7 @@ public class TransferenciaService implements TransferenciaUseCase {
     }
 
     private void gerarEventos(String contaOrigemId, String contaDestinoId, BigDecimal valor, BigDecimal origemSaldo, BigDecimal destinoSaldo) {
-        log.info("TransferenciaService: gerarEventos()");
+        log.info("gerarEventos()");
 
         // Evento transferência realizada
         eventPublisher.publishEvent(new TransferenciaRealizadaEvent(
