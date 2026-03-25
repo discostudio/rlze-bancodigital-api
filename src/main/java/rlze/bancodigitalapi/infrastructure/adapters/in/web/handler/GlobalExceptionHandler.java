@@ -63,7 +63,6 @@ public class GlobalExceptionHandler {
         }
         else if (rootCause instanceof com.fasterxml.jackson.core.JsonParseException jpe) {
             message = "Parâmetro inválido. Revise os tipos informados.";
-            //details.put("causa", "Formato de dado inválido detectado próximo a: " + jpe.getProcessor().toString());
         }
         // 2. Se o erro for propriedade desconhecida ('fail-on-unknown-properties: true' configurado no application.yml)
         else if (rootCause instanceof com.fasterxml.jackson.databind.exc.UnrecognizedPropertyException upe) {
@@ -100,7 +99,7 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleInvalidParameter(MethodArgumentNotValidException ex) {
-        // 1. Criamos um mapa com Nome do Campo -> Mensagem de Erro
+        // 1. Map Nome do Campo -> Mensagem de Erro
         Map<String, String> detalhesDosErros = ex.getBindingResult()
                 .getFieldErrors()
                 .stream()
@@ -110,7 +109,7 @@ public class GlobalExceptionHandler {
                         (existente, novo) -> existente + " e " + novo // Caso o mesmo campo tenha 2 erros (ex: @NotNull e @Positive)
                 ));
 
-        // 2. Criamos o ErrorResponse usando o seu construtor completo
+        // 2. ErrorResponse usando o seu construtor completo
         ErrorResponse errorBody = new ErrorResponse(
                 "INVALID_PARAMETER",
                 "Um ou mais campos possuem erros de validação.",
