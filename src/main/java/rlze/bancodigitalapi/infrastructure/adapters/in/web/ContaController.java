@@ -10,10 +10,10 @@ import io.swagger.v3.oas.annotations.tags.Tag;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import org.springframework.web.server.ResponseStatusException;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ContaResponse;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ErrorResponse;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.NovaContaRequest;
@@ -22,6 +22,7 @@ import rlze.bancodigitalapi.application.ports.in.GestaoContaUseCase;
 import java.security.InvalidParameterException;
 import java.util.List;
 
+@Slf4j
 @Tag(name = "Contas", description = "Endpoints para gestão de contas bancárias")
 @RestController
 @RequestMapping("/v1/contas")
@@ -49,6 +50,8 @@ public class ContaController {
     @PostMapping
     @ResponseStatus(HttpStatus.CREATED)
     public void criar(@Valid @RequestBody NovaContaRequest request) {
+        log.info("ContasController: POST /v1/contas. Nome: {}.", request.nomeTitular());
+
         gestaoContaUseCase.criarConta(request.nomeTitular(), request.saldo());
     }
 
@@ -86,6 +89,7 @@ public class ContaController {
             String nomeTitular,
             // Injeta request bruto para validar queryParams
             HttpServletRequest request) {
+        log.info("ContasController: GET /v1/contas. Nome: {}.", nomeTitular);
 
         // Validação de parâmetros: Se houver mais de 1 parâmetro ou o parâmetro não for 'nomeTitular'
         if (!request.getParameterMap().isEmpty() && !request.getParameterMap().containsKey("nomeTitular")

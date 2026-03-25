@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import io.swagger.v3.oas.annotations.tags.Tag;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
@@ -17,6 +18,7 @@ import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.ErrorResponse;
 import rlze.bancodigitalapi.infrastructure.adapters.in.web.dto.TransferenciaRequest;
 import rlze.bancodigitalapi.application.ports.in.TransferenciaUseCase;
 
+@Slf4j
 @Tag(name = "Transferências", description = "Endpoints para transferência entre contas bancárias")
 @RestController
 @RequestMapping("/v1/transferencias")
@@ -67,6 +69,8 @@ public class TransferenciaController {
     })
     @PostMapping
     public ResponseEntity<Void> transferir(@RequestBody TransferenciaRequest request) {
+        log.info("TranferenciaController: POST /v1/transferencias. Origem: {}. Destino {}", request.idContaOrigem(), request.idContaDestino());
+
         transferenciaUseCase.executarTransferencia(request);
         return ResponseEntity.ok().build();
     }

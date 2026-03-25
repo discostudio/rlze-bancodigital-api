@@ -1,5 +1,6 @@
 package rlze.bancodigitalapi.infrastructure.adapters.in.web.handler;
 
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.support.DefaultMessageSourceResolvable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -20,12 +21,14 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 
+@Slf4j
 @ControllerAdvice
 public class GlobalExceptionHandler {
 
     // 404 - Não Encontrado
     @ExceptionHandler(EntityNotFoundException.class)
     public ResponseEntity<ErrorResponse> handleNotFound(EntityNotFoundException ex) {
+        log.error(ex.getMessage(), ex);
         return ResponseEntity.status(HttpStatus.NOT_FOUND)
                 .body(new ErrorResponse("NOT_FOUND", ex.getMessage()));
     }
@@ -33,6 +36,8 @@ public class GlobalExceptionHandler {
     // 422 - Erro de Negócio (Saldo, limite, etc)
     @ExceptionHandler(BusinessException.class)
     public ResponseEntity<ErrorResponse> handleBusiness(BusinessException ex) {
+        log.error(ex.getMessage(), ex);
+
         return ResponseEntity.status(HttpStatus.UNPROCESSABLE_ENTITY)
                 .body(new ErrorResponse("BUSINESS_ERROR", ex.getMessage()));
     }
@@ -40,6 +45,8 @@ public class GlobalExceptionHandler {
     // 409 - Conflito (Optimistic Locking)
     @ExceptionHandler(ObjectOptimisticLockingFailureException.class)
     public ResponseEntity<ErrorResponse> handleConflict(ObjectOptimisticLockingFailureException ex) {
+        log.error(ex.getMessage(), ex);
+
         return ResponseEntity.status(HttpStatus.CONFLICT)
                 .body(new ErrorResponse("CONCURRENCY_ERROR", "A conta foi atualizada por outra operação. Tente novamente."));
     }
@@ -47,6 +54,8 @@ public class GlobalExceptionHandler {
     // 400 - Bad Request - campos inválidos
     @ExceptionHandler(HttpMessageNotReadableException.class)
     public ResponseEntity<ErrorResponse> handleInvalidJson(HttpMessageNotReadableException ex) {
+        log.error(ex.getMessage(), ex);
+
         String message = "Erro na leitura do JSON.";
         Map<String, String> details = new HashMap<>();
 
@@ -87,18 +96,24 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(InvalidParameterException.class)
     public ResponseEntity<ErrorResponse> handleInvalidParameter(InvalidParameterException ex) {
+        log.error(ex.getMessage(), ex);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
     }
 
     @ExceptionHandler(IllegalArgumentException.class)
     public ResponseEntity<ErrorResponse> handleInvalidParameter(IllegalArgumentException ex) {
+        log.error(ex.getMessage(), ex);
+
         return ResponseEntity.status(HttpStatus.BAD_REQUEST)
                 .body(new ErrorResponse("INVALID_PARAMETER", ex.getMessage()));
     }
 
     @ExceptionHandler(MethodArgumentNotValidException.class)
     public ResponseEntity<ErrorResponse> handleInvalidParameter(MethodArgumentNotValidException ex) {
+        log.error(ex.getMessage(), ex);
+
         // 1. Map Nome do Campo -> Mensagem de Erro
         Map<String, String> detalhesDosErros = ex.getBindingResult()
                 .getFieldErrors()

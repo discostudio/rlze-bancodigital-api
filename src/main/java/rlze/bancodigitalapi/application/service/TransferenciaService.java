@@ -2,6 +2,7 @@ package rlze.bancodigitalapi.application.service;
 
 import jakarta.transaction.Transactional;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.ApplicationEventPublisher;
 import org.springframework.stereotype.Service;
 import rlze.bancodigitalapi.domain.exception.EntityNotFoundException;
@@ -14,6 +15,9 @@ import rlze.bancodigitalapi.domain.event.TransferenciaRealizadaEvent;
 import rlze.bancodigitalapi.domain.exception.BusinessException;
 import rlze.bancodigitalapi.domain.model.Conta;
 
+import java.math.BigDecimal;
+
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class TransferenciaService implements TransferenciaUseCase {
@@ -40,28 +44,38 @@ public class TransferenciaService implements TransferenciaUseCase {
         // 2. Executa a regra de negócio no Domínio
         origem.debitar(request.valor());
         destino.creditar(request.valor());
+        log.info("TransferenciaService: debitar(),creditar()");
 
         // 3. Persiste os novos estados
         // O JPA usará o @Version para garantir que ninguém alterou essas contas
         // entre o momento que lemos e o momento que salvamos (Optimistic Lock).
         contaRepositoryPort.salvar(origem);
         contaRepositoryPort.salvar(destino);
+        log.info("TransferenciaService: salvar()");
 
-        System.out.println("Transferência de R$ " + request.valor() + " concluída com sucesso!");
 
         // Dispara as notificações (publica eventos para serem consumidos)
+        gerarEventos(origem.getId(), destino.getId(), request.valor(), origem.getSaldo(),  destino.getSaldo());
+    }
+
+    private void gerarEventos(String contaOrigemId, String contaDestinoId, BigDecimal valor, BigDecimal origemSaldo, BigDecimal destinoSaldo) {
+        // Evento transferência realizada
         eventPublisher.publishEvent(new TransferenciaRealizadaEvent(
-                origem.getId(),
-                destino.getId(),
-                request.valor()
+                contaOrigemId,
+                contaDestinoId,
+                valor
         ));
+
+        // Evento Débito realizado
         eventPublisher.publishEvent(new DebitoRealizadoEvent(
-                origem.getId(),
-                request.valor(),
-                origem.getSaldo()));
+                contaOrigemId,
+                valor,
+                origemSaldo));
+
+        // Evento crédito realizado
         eventPublisher.publishEvent(new CreditoRealizadoEvent(
-                destino.getId(),
-                request.valor(),
-                destino.getSaldo()));
+                contaDestinoId,
+                valor,
+                destinoSaldo));
     }
 }
