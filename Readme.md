@@ -11,7 +11,7 @@ API REST para gerenciamento de contas e movimentações financeiras.
 5. Os testes podem ser executados nos endpoints via **Postman** ou no **swagger** (http://localhost:8080/swagger-ui/index.html).  
 6. Para visualizar as notificações e logs, é necessário acompanhar os **logs da aplicação no Docker**.
 
-## ==> DECISÕES DE DESIGN E ARQUITETURA
+## 🏗️ Decisões de design e arquitetura  
 
 ### Arquitetura hexagonal 
 Optei por uma versão pragmática da Arquitetura Hexagonal para garantir o desacoplamento entre a lógica de negócio e os detalhes de infraestrutura.  
@@ -20,9 +20,9 @@ Optei por uma versão pragmática da Arquitetura Hexagonal para garantir o desac
 - **Portas e Adaptadores:** A comunicação com o mundo externo é feita através de interfaces (ports). Se amanhã precisar trocar o MySQL por MongoDB ou enviar notificações via Kafka em vez de Spring, alteramos apenas o adaptador na camada de infrastructure, sem tocar na regra de transferência.      
 
 src/main/java/rlze/bancodigitalapi/  
-├── **application/**         # Use Cases e Serviços (Regras de Aplicação)  
-├── **domain/**              # Modelos de Domínio, Exceções e Eventos  
-└── **infrastructure/**      # Adaptadores de entrada (Web) e saída (Persistence/Config)  
+├── **application/** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Use Cases e Serviços (Regras de Aplicação)  
+├── **domain/** &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;# Modelos de Domínio, Exceções e Eventos  
+└── **infrastructure/** &nbsp;&nbsp;# Adaptadores de entrada (Web) e saída (Persistence/Config)  
 
 ### Evolução de schema com Flyway  
 O uso do *Flyway* foi adotado para garantir versionamento do banco, preservação de histórico, imutabilidade e consistência de dados, além da carga inicial de contas.  
@@ -49,12 +49,12 @@ Também poderia ser utilizada uma aplicação de envio de e-mail (SendGrid, Jaka
 
 ### Padronização de erros  
 Mensagens e retorno padronizados (detalhados no swagger):  
-**404 Not Found**: Recurso inexistente.  
-**422 Unprocessable Entity**: Erros de regra de negócio (Ex: saldo insuficiente).  
-**400 Bad Request**: Parâmetros inválidos ou JSON malformado.  
-**409 Conflict**: Conflito de atualização simultânea.  
+&nbsp;&nbsp;**404 Not Found**: Recurso inexistente.  
+&nbsp;&nbsp;**422 Unprocessable Entity**: Erros de regra de negócio (Ex: saldo insuficiente).  
+&nbsp;&nbsp;**400 Bad Request**: Parâmetros inválidos ou JSON malformado.  
+&nbsp;&nbsp;**409 Conflict**: Conflito de atualização simultânea.  
 
-## ==> DECISÕES DE NEGÓCIO  
+## 📋 Decisões de negócio  
 
 Decisões tomadas para fins de simplificação do escopo.  
 
@@ -67,25 +67,26 @@ Optei por criar apenas consulta pelo nome do titular, e permitir também a consu
 ### Envio da notificação  
 Optei por não incluir envio de mensagem ou e-mail para o cliente ao realizar uma transferência. Ao invés disso usei a estrutura de evento para simular uma mensagem via saída de texto da aplicação.
 
-## Tecnologias
+## 🛠️ Tecnologias
 
 Java 21+  
 Spring Boot 3.5.11  
 Spring Data JPA  
 MySQL 8 (via Docker)  
+Flyway
 Lombok  
 Maven
 
-## Endpoints Principais
+## 📍 Endpoints Principais
 **Método -> URL -> Descrição**  
-**POST** ->	http://localhost:8080/v1/contas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Cria uma conta  
-**GET** -> http://localhost:8080/v1/contas?nomeTitular=teste -> Pesquisa contas pelo nome do titular  
-**GET** -> http://localhost:8080/v1/contas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Pesquisa contas (todas)  
-**POST** -> http://localhost:8080/v1/transferencias &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Realiza uma transferência entre contas
+**POST** ->	http://localhost:8080/v1/contas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Cria uma conta  
+**GET** -> &nbsp;&nbsp;http://localhost:8080/v1/contas?nomeTitular=teste &nbsp;-> Pesquisa contas pelo nome do titular  
+**GET** -> &nbsp;&nbsp;http://localhost:8080/v1/contas &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Pesquisa contas (todas)  
+**POST** -> http://localhost:8080/v1/transferencias &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;-> Realiza uma transferência entre contas
 
 **Documentação Swagger:** http://localhost:8080/swagger-ui/index.html
 
-## Formato das Requisições/Respostas
+## 🔗 Formato das Requisições/Respostas
 
 ### Criar conta
 
@@ -125,7 +126,7 @@ Maven
 &nbsp;&nbsp;&nbsp;&nbsp;"valor": 10  
 }
 
-## ==> JOURNAL (passo a passo da implementação):
+## 📖 Passo a passo da implementação:
 
 1 - Criação do repositório no github, com initial commit simulando scaffolding básico com configuração de banco e estrutura de pastas.  
 
@@ -145,20 +146,17 @@ Maven
 6 - Documentação swagger  
 
 7 - Logs básicos  
+&nbsp;&nbsp;-> Camada de controller, service e erros  
 
 8 - Teste end2end  
-&nbsp;&nbsp;-> ajustes códigos HTTP de retorno em cenários de erro  
 
+## 📡 Melhorias futuras consideradas
 
-## Melhorias futuras recomendadas
-
-Maior cobertura de testes unitários.  
-
-Análise estática de código (com SonarQube, por exemplo).  
-
-Testes de performance (com JMeter, por exemplo), quantificando eventual necessidade de ajustes de arquitetura e escalabilidade.  
-
-Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.  
+- Notificação via e-mail ou mensagem para o titular da conta.
+- Maior cobertura de testes unitários.
+- Análise estática de código (com SonarQube, por exemplo).
+- Testes de performance (com JMeter ou K6, por exemplo), quantificando eventual necessidade de ajustes de arquitetura e escalabilidade.
+- Observabilidade e monitoramento: métricas padrão via actuator, métricas customizadas, logs com correlation ID. Através do uso de ferramentas como Prometheus, Grafana e Opentelemetry.  
 
 ---
 Desenvolvido por Fernando Cardoso.
