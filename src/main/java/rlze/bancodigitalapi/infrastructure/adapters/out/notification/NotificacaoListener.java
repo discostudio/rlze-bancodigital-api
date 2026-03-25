@@ -1,8 +1,9 @@
 package rlze.bancodigitalapi.infrastructure.adapters.out.notification;
 
-import org.springframework.context.event.EventListener;
 import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Component;
+import org.springframework.transaction.event.TransactionPhase;
+import org.springframework.transaction.event.TransactionalEventListener;
 import rlze.bancodigitalapi.domain.event.CreditoRealizadoEvent;
 import rlze.bancodigitalapi.domain.event.DebitoRealizadoEvent;
 import rlze.bancodigitalapi.domain.event.TransferenciaRealizadaEvent;
@@ -14,7 +15,7 @@ public class NotificacaoListener {
     // Comportamento do listener. Nessa classe seria a integração com AWS SNS, SendGrid, Twilio, etc.
 
     @Async // Faz rodar em uma thread separada
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT) // // SÓ roda se o banco (@Transactional do pub) der OK
     public void handleTransferencia(TransferenciaRealizadaEvent event) {
         System.out.println("---------------------------------------------------------");
         System.out.println("[NOTIFICAÇÃO TRANSFERÊNCIA]");
@@ -25,7 +26,7 @@ public class NotificacaoListener {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleDebito(DebitoRealizadoEvent event) {
         System.out.println("[NOTIFICAÇÃO DÉBITO] Conta: " + event.idConta() +
                 " | Valor retirado: R$ " + event.valor() +
@@ -33,7 +34,7 @@ public class NotificacaoListener {
     }
 
     @Async
-    @EventListener
+    @TransactionalEventListener(phase = TransactionPhase.AFTER_COMMIT)
     public void handleCredito(CreditoRealizadoEvent event) {
         System.out.println("[NOTIFICAÇÃO CRÉDITO] Conta: " + event.idConta() +
                 " | Valor recebido: R$ " + event.valor() +
